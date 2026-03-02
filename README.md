@@ -109,27 +109,32 @@ Une interface HTML permet :
 
 ### 1. Organisation des fichiers
 
-Créer les dossiers suivants dans `/config/` :
-
-/config/packages/
-/config/python_scripts/
+Créez les dossiers suivants dans votre répertoire `/config/` (c'est la racine de HA dans File Editor, la ou se trouve le configuration.yaml) :
+* `/config/python_scripts/` (moteurs de calcul)
+* `/config/packages/` (configuration YAML)
+* `/config/www/cave/` (stockage du rendu HTML)
 
 ---
 
 ### 2. Configuration du `configuration.yaml`
 
-Ajoutez (ou vérifiez) :
+* Ajoutez les lignes suivantes pour activer le système et protéger votre base de données contre le gonflement inutile (l'IA est gourmande en log...) :
 
-yaml
+```yaml
 homeassistant:
   packages: !include_dir_named packages
 
+# Configuration du Recorder pour protéger votre stockage
 recorder:
   purge_keep_days: 7
   exclude:
+    entities:
+      - sensor.vin_recherche # Donnée temporaire volumineuse
+      - input_text.derniere_erreur_gemini
     event_types:
-      - system_log_event
+      - system_log_event # Évite d'historiser les erreurs système répétitives
 
+```
 
 Redémarrer Home Assistant après modification.
 
