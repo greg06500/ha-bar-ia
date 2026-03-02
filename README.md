@@ -151,36 +151,19 @@ Redémarrer Home Assistant après modification.
 | `bar_plan.html` (généré auto) | `/config/www/` | Fichier de rendu final |
 
 
-### 🔐 Configuration du Token API
-
-Certains scripts nécessitent un TOKEN Home Assistant longue durée.
-
-Insérer dans les fichiers concernés :
-
-TOKEN = "YOUR_LONG_LIVED_TOKEN"
-
+### 4. 🔐 Configuration du Token API
+Vous devez insérer un **TOKEN HA longue durée** dans la variable `TOKEN = "..."` située au début des fichiers suivants :
+* `generate_cave.py`
+  
 Fichiers concernés :
-	•	generate_bar_plan.py
-	•	analyze_bar_stock.py
-	•	bar_autofill.py
-	•	bar_empty.py
+* `generate_bar_plan.py`
+* `analyze_bar_stock.py`
+* `bar_autofill.py`
+* `bar_empty.py`
+* 
+Pour créer un jeton longue durée, cliquez sur votre nom en bas du menu à gauche dans HA => onglet Securité => (en bas) Jetons d'accès longue durée / créer un jeton.
 
-Création du token
-	1.	Profil utilisateur (en bas à gauche)
-	2.	Onglet Sécurité
-	3.	Jetons d’accès longue durée
-	4.	Créer un jeton
-
-⚠️ Ne jamais publier un token réel sur GitHub.
-
-📖 Utilisation
-	1.	Recherche : Entrer nom et type du spiritueux puis lancer l’IA.
-	2.	Ajout : Ajouter la bouteille au bar.
-	3.	Gestion : Ajuster les quantités via la liste déroulante.
-	4.	Accord Barman : Entrer ingrédients / occasion puis lancer la suggestion.
-	5.	Rangement : Positionner les bouteilles et générer le visuel HTML.
-
-⸻
+---
 
 🙏 Remerciements
 
