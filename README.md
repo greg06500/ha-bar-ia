@@ -114,7 +114,6 @@ Créez les dossiers suivants dans votre répertoire `/config/` (c'est la racine 
 * `/config/packages/` (configuration YAML)
 * `/config/www/cave/` (stockage du rendu HTML)
 
----
 
 ### 2. Configuration du `configuration.yaml`
 
@@ -150,8 +149,9 @@ Redémarrer Home Assistant après modification.
 | `bar_empty.py` | `/config/python_scripts/` | Script de vidage complet |
 | `bar_plan.html` (généré auto) | `/config/www/` | Fichier de rendu final |
 
+---
 
-### 4. 🔐 Configuration du Token API
+### 🔐 Configuration du Token API
 Vous devez insérer un **TOKEN HA longue durée** dans la variable `TOKEN = "..."` située au début des fichiers suivants :
 * `generate_cave.py`
   
