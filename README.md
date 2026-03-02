@@ -110,6 +110,7 @@ Une interface HTML permet :
 ### 1. Organisation des fichiers
 
 Créer les dossiers suivants dans `/config/` :
+
 /config/packages/
 /config/python_scripts/
 
@@ -117,7 +118,9 @@ Créer les dossiers suivants dans `/config/` :
 
 ### 2. Configuration du `configuration.yaml`
 
-```yaml
+Ajoutez (ou vérifiez) :
+
+yaml
 homeassistant:
   packages: !include_dir_named packages
 
@@ -126,8 +129,6 @@ recorder:
   exclude:
     event_types:
       - system_log_event
-
-
 
 
 Redémarrer Home Assistant après modification.
