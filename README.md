@@ -53,12 +53,9 @@ L’IA agit comme un expert en spiritueux en croisant des sources spécialisées
 - Distinction Maison / Industriel
 - Valorisation estimée du bar
 - Nombre total de bouteilles
-
----
+<img width="877" height="713" alt="Capture d’écran 2026-03-03 à 06 00 40" src="https://github.com/user-attachments/assets/faa261f9-dd63-4a49-bbbe-0ccea6bbcc04" />
 
 # 🚀 Modules avancés
-
----
 
 ## 🏠 Mode Bouteille Maison
 
@@ -69,8 +66,8 @@ Création de spiritueux personnalisés :
 - Prix conseillé automatique
 - Calcul marge
 - Coût au litre
+<img width="316" height="709" alt="Capture d’écran 2026-03-03 à 06 01 44" src="https://github.com/user-attachments/assets/f0657089-6bdb-4179-a5fd-5d949abd1f9d" />
 
----
 
 ## 🍸 Accord du Barman (IA)
 
@@ -91,8 +88,7 @@ Réponse structurée en JSON strict :
 - Garnish
 - Niveau
 - Variantes
-
----
+<img width="1068" height="640" alt="Capture d’écran 2026-03-03 à 06 01 09" src="https://github.com/user-attachments/assets/bf9a6ed2-4b68-4a8a-9b6d-2da670da1925" />
 
 ## 📈 Analyse du Stock & Cohérence
 
@@ -104,7 +100,7 @@ Comparaison automatique entre :
 - Suroccupation
 - Inconnues dans le plan
 
----
+
 
 ## 🗺️ Visualisation & Rangement du Bar (Frontend)
 
@@ -116,8 +112,7 @@ Interface HTML dynamique :
 - Vidage complet
 - Synchronisation inventaire / plan
 - Génération HTML automatique
-
----
+<img width="318" height="571" alt="Capture d’écran 2026-03-03 à 06 23 03" src="https://github.com/user-attachments/assets/7470691c-a5dd-4064-b47f-2a67299f6a7d" />
 
 # 🛠 Prérequis
 
@@ -209,7 +204,7 @@ Pour créer un jeton longue durée, cliquez sur votre nom en bas du menu à gauc
 
 🙏 Remerciements
 
-Un immense merci à Aldoushx pour son projet
+Un immense merci à [Aldoushx](https://github.com/aldoushx/ha-cellier-ia/) pour son projet
 Home Assistant Wine Cellar Manager (AI Powered).
 
 Son architecture, sa structuration des packages et son approche intelligente du supersensor ont été une source d’inspiration directe pour cette adaptation dédiée aux spiritueux.
