@@ -41,6 +41,8 @@ L’IA agit comme un expert en spiritueux en croisant des sources spécialisées
 - Profil aromatique structuré
 - Corps cocktail (léger / moyen / puissant)
 - Suggestions adaptées
+<img width="1064" height="727" alt="Capture d’écran 2026-03-03 à 06 28 24" src="https://github.com/user-attachments/assets/369851b3-ca6f-45bf-bd56-97b6cd1fbd02" />
+<img width="736" height="595" alt="Capture d’écran 2026-03-03 à 06 19 39" src="https://github.com/user-attachments/assets/34466139-75d4-411b-b958-c429005756ad" />
 
 ---
 
