@@ -102,8 +102,6 @@ Comparaison automatique entre :
 - Suroccupation
 - Inconnues dans le plan
 
-
-
 ## 🗺️ Visualisation & Rangement du Bar (Frontend)
 
 Interface HTML dynamique :
@@ -141,8 +139,6 @@ Interface HTML dynamique :
 Créez les dossiers suivants dans votre répertoire `/config/` (c'est la racine de HA dans File Editor, la ou se trouve le configuration.yaml) :
 * `/config/python_scripts/` (moteurs de calcul)
 * `/config/packages/` (configuration YAML)
-* `/config/www/cave/` (stockage du rendu HTML)
-
 
 ### 2. Configuration du `configuration.yaml`
 
@@ -157,8 +153,8 @@ recorder:
   purge_keep_days: 7
   exclude:
     entities:
-      - sensor.vin_recherche # Donnée temporaire volumineuse
-      - input_text.derniere_erreur_gemini
+      - sensor.bar_spiritueux_recherche # Donnée temporaire volumineuse
+      - input_text.bar_derniere_erreur_ia
     event_types:
       - system_log_event # Évite d'historiser les erreurs système répétitives
 
@@ -182,7 +178,7 @@ Redémarrer Home Assistant après modification.
 
 ### 🔐 Configuration du Token API
 Vous devez insérer un **TOKEN HA longue durée** dans la variable `TOKEN = "..."` située au début des fichiers suivants :
-* `generate_cave.py`
+* `generate_bar_plan.py`
   
 Fichiers concernés :
 * `generate_bar_plan.py`
@@ -196,11 +192,35 @@ Pour créer un jeton longue durée, cliquez sur votre nom en bas du menu à gauc
 
 ## 📖 Utilisation
 
-1. **Saisie** : Tapez le nom, la couleur et l'année dans l'interface du dashboard. Cliquez sur **Rechercher le vin**.
-2. **Analyse** : Pendant que l'IA travaille, vous pouvez observer que la demande est bien prise en compte avec un indicateur d'opération. La requête prend environ 10s.
-3. **Stockage** : Quand la recherche est terminée, le vin trouvé est décrit sommairement. Si sa description correspond à l'attendu, cliquez sur **Ajouter le vin à la cave** pour basculer le vin de la recherche vers votre inventaire permanent.
-4. **Gestion** : Déployez "Afficher la gestion de la cave" pour ajuster vos stocks, à l'aide de la liste déroulante et des boutons associés.
-5. **Conseils du sommelier** : Entrez votre repas dans le champs texte et lancez la recherche IA. La réponse arrivera sous 15s. Idem pour les conseils d'achats et les opportunités, les champs sont suffisamment explicites !
+1. **Recherche d’un spiritueux**  
+   Entrez le nom et le type (Rhum, Gin, Whisky, etc.) dans l’interface du dashboard, puis cliquez sur **Rechercher le spiritueux**.
+
+2. **Analyse IA**  
+   Pendant que l’IA traite la demande, un indicateur visuel confirme la prise en compte.  
+   La génération de la fiche prend environ 10 secondes.
+
+3. **Ajout au bar**  
+   Lorsque la fiche est générée, vérifiez les informations.  
+   Si elles correspondent à votre bouteille, cliquez sur **Ajouter au bar** pour l’intégrer à votre inventaire permanent.
+
+4. **Gestion du stock**  
+   Utilisez la section **Gestion du bar** pour :
+   - Ajuster les quantités (+1 / -1)
+   - Supprimer une bouteille
+   - Gérer les doublons
+   - Consulter la valorisation totale
+
+5. **Accord du Barman (IA)**  
+   Renseignez :
+   - Une bouteille (optionnel)
+   - Les ingrédients disponibles
+   - L’occasion ou l’envie
+
+   Cliquez sur **Lancer la suggestion** pour obtenir un cocktail structuré (nom, recette, niveau, variantes, etc.).  
+   La réponse IA arrive généralement sous 10 à 15 secondes.
+
+6. **Rangement & Visualisation**  
+   Positionnez vos bouteilles dans le plan (manuel ou automatique), puis générez le visuel HTML pour afficher la disposition complète de votre bar.
 
 ---
 
