@@ -2,19 +2,11 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from datetime import datetime
 
 CONFIG_DIR = Path('/config')
 PLAN_PATH = CONFIG_DIR / 'bar_plan.json'
 
-DEFAULT_PLAN = {
-    'meta': {
-        'created': datetime.now().isoformat(timespec='seconds'),
-        'shelves': 5,
-        'cols': 4,
-    },
-    'cells': {}
-}
+DEFAULT_PLAN = {}
 
 
 def safe_load(path: Path, default):
@@ -34,12 +26,9 @@ def safe_save(path: Path, data) -> None:
 
 
 def ensure_files():
-    if not INV_PATH.exists():
-        safe_save(INV_PATH, {})
     if not PLAN_PATH.exists():
         safe_save(PLAN_PATH, DEFAULT_PLAN)
 
 
 def normalize_label(s: str) -> str:
     return (s or '').strip()
-

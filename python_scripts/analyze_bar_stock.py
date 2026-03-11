@@ -1,11 +1,14 @@
 
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import json
 import urllib.request
 import os
 import re
 
 # ---------------------------
-# CONFIGURATION (À ADAPTER)
+# CONFIGURATION
 # ---------------------------
 TOKEN = "MON_TOKEN"
 URL_INV = "http://127.0.0.1:8123/api/states/sensor.bar_supersensor"
@@ -21,13 +24,12 @@ def val_or(x, default=""):
 
 
 def parse_maison(info: dict) -> bool:
-    """Accepte maison dict OU string JSON."""
     maison = info.get("maison")
     if isinstance(maison, dict):
         return bool(maison.get("est_maison") is True)
     if isinstance(maison, str):
         s = maison.strip()
-        if s and s.lower() not in ("none", "unknown"):
+        if s and s.lower() not in ("none", "unknown", "null", ""):
             try:
                 m = json.loads(s)
                 if isinstance(m, dict):
@@ -38,9 +40,9 @@ def parse_maison(info: dict) -> bool:
 
 
 def wine_color_emoji(info: dict) -> str:
-    """Vin coloré selon info.couleur (mapping ou string)."""
     couleur = ""
     c = info.get("couleur")
+
     if isinstance(c, dict):
         couleur = str(c.get("valeur", "")).lower()
     elif c is not None:
@@ -50,7 +52,6 @@ def wine_color_emoji(info: dict) -> str:
         return "🔴"
     if "blanc" in couleur:
         return "🌕"
-    # rosé / rose / ros / rosé
     if "ros" in couleur:
         return "🏮"
     return "⚪"
@@ -59,12 +60,10 @@ def wine_color_emoji(info: dict) -> str:
 def emoji_from_type(info: dict) -> str:
     t = str(val_or(info.get("type"), "")).lower()
 
-    # ✅ vin (emoji couleur)
     if "vin" in t:
         return wine_color_emoji(info)
 
-    # bar classique
-    if any(x in t for x in ["rhum", "whisk", "whisky", "bourbon", "scotch"]):
+    if any(x in t for x in ["rhum", "rum", "whisk", "whisky", "whiskey", "bourbon", "scotch"]):
         return "🥃"
     if "gin" in t:
         return "🍸"
@@ -75,16 +74,10 @@ def emoji_from_type(info: dict) -> str:
     if any(x in t for x in ["liqueur", "crème", "creme"]):
         return "🍯"
 
-    # ⚠️ ton Bar utilise plutôt 🍾 en fallback
     return "🍾"
 
 
 def build_base_label(info: dict) -> str:
-    """
-    Label EXACT comme tes input_select :
-    badge 🏠 si maison + emoji + nom + (année) si présent
-    (sans suffixe #n ici)
-    """
     nom = val_or(info.get("nom"), "Sans nom")
     an = val_or(info.get("annee"), "-")
     est_maison = parse_maison(info)
@@ -116,30 +109,31 @@ def fetch_supersensor():
         return json.loads(response.read().decode("utf-8", errors="ignore"))
 
 
-def normalize_inventory(inv: dict) -> dict:
+def build_inventory_maps(inv: dict):
     """
-    Recrée les labels AVEC suffixe #n exactement comme tes automations input_select :
-    base_label, puis si doublon => " #2", " #3" selon l'ordre d'itération.
-    On additionne ensuite qty par label final.
+    Retourne :
+    - stock_by_id : quantité théorique par spirit_id
+    - label_by_id : label final affiché pour ce spirit_id
     """
     counts = {}
-    stock = {}
+    stock_by_id = {}
+    label_by_id = {}
 
-    # IMPORTANT : on garde l'ordre du dict (comme en Jinja bar.items()).
-    for _id, info in inv.items():
+    for sid, info in inv.items():
         if not isinstance(info, dict):
             continue
 
         base = build_base_label(info)
-
         n = counts.get(base, 0) + 1
         counts[base] = n
         final_label = base if n == 1 else f"{base} #{n}"
 
         qty = int(info.get("nombre_bouteilles", 0) or 0)
-        stock[final_label] = stock.get(final_label, 0) + qty
 
-    return stock
+        stock_by_id[sid] = qty
+        label_by_id[sid] = final_label
+
+    return stock_by_id, label_by_id
 
 
 def analyze():
@@ -158,52 +152,73 @@ def analyze():
         else:
             inv = {}
 
-        stock_theorique = normalize_inventory(inv)
-        total_inv = sum(stock_theorique.values())
+        stock_by_id, label_by_id = build_inventory_maps(inv)
+        total_inv = sum(stock_by_id.values())
 
         # 2) PLAN
         plan = safe_load_json(PATH_PLAN)
 
-        placed_counts = {}
+        placed_by_id = {}
         unknown_in_plan = []
+        legacy_in_plan = []
 
-        def handle_cell(cell: str, label: str):
-            label = (label or "").strip()
-            if not label or label.lower() == "none":
-                return
-            placed_counts[label] = placed_counts.get(label, 0) + 1
-            if label not in stock_theorique:
-                unknown_in_plan.append({"cell": cell, "label": label})
+        if isinstance(plan, dict):
+            if isinstance(plan.get("cells"), dict):
+                cells = plan.get("cells", {})
+            else:
+                cells = plan
 
-        if isinstance(plan, dict) and isinstance(plan.get("cells"), dict):
-            cells = plan.get("cells", {})
             for cell, v in cells.items():
                 if not isinstance(cell, str) or not CELL_RE.match(cell.strip()):
                     continue
-                if isinstance(v, dict):
-                    handle_cell(cell, (v.get("label") or "").strip())
-                else:
-                    handle_cell(cell, str(v).strip())
-        else:
-            if not isinstance(plan, dict):
-                plan = {}
-            for cell, label in plan.items():
-                if not isinstance(cell, str) or not CELL_RE.match(cell.strip()):
-                    continue
-                handle_cell(cell, str(label).strip())
 
-        total_plan = sum(placed_counts.values())
+                # nouveau format
+                if isinstance(v, dict):
+                    sid = str(v.get("id", "")).strip()
+                    label = str(v.get("label", "")).strip()
+
+                    if not sid:
+                        unknown_in_plan.append({"cell": cell, "label": label or "Entrée sans id"})
+                        continue
+
+                    placed_by_id[sid] = placed_by_id.get(sid, 0) + 1
+
+                    if sid not in stock_by_id:
+                        unknown_in_plan.append({"cell": cell, "label": label or sid})
+
+                # ancien format
+                elif isinstance(v, str):
+                    label = v.strip()
+
+                    if not label or label.lower() == "none":
+                        continue
+
+                    legacy_in_plan.append({"cell": cell, "label": label})
+                    unknown_in_plan.append({"cell": cell, "label": label})
+
+        total_plan = sum(placed_by_id.values()) + len(legacy_in_plan)
 
         # 3) COMPARAISON
         overbooked = []
         unplaced = []
 
-        for label, qty in stock_theorique.items():
-            placed = placed_counts.get(label, 0)
+        for sid, qty in stock_by_id.items():
+            placed = placed_by_id.get(sid, 0)
+            label = label_by_id.get(sid, sid)
+
             if placed > qty:
-                overbooked.append({"label": label, "placed": placed, "qty": qty})
+                overbooked.append({
+                    "id": sid,
+                    "label": label,
+                    "placed": placed,
+                    "qty": qty
+                })
             elif placed < qty:
-                unplaced.append({"label": label, "remaining": qty - placed})
+                unplaced.append({
+                    "id": sid,
+                    "label": label,
+                    "remaining": qty - placed
+                })
 
         return {
             "total_inv": total_inv,
@@ -211,7 +226,8 @@ def analyze():
             "details": {
                 "overbooked": overbooked,
                 "unplaced": unplaced,
-                "unknown_in_plan": unknown_in_plan
+                "unknown_in_plan": unknown_in_plan,
+                "legacy_in_plan": legacy_in_plan
             }
         }
 
@@ -223,6 +239,7 @@ def analyze():
                 "overbooked": [],
                 "unplaced": [],
                 "unknown_in_plan": [],
+                "legacy_in_plan": [],
                 "error": str(e)
             }
         }

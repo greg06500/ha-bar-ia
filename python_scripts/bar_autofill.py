@@ -1,9 +1,10 @@
 
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import json
 import urllib.request
 import subprocess
-import os
 
 TOKEN = "MON_TOKEN"
 URL_BASE = "http://localhost:8123/api/states/"
@@ -27,23 +28,27 @@ def val_or(x, default=""):
 
 def parse_maison(v: dict) -> bool:
     maison = v.get("maison")
+
     if isinstance(maison, dict):
         return bool(maison.get("est_maison") is True)
+
     if isinstance(maison, str):
         s = maison.strip()
-        if s and s.lower() not in ("none", "unknown"):
+        if s and s.lower() not in ("none", "unknown", "null", ""):
             try:
                 m = json.loads(s)
                 if isinstance(m, dict):
                     return bool(m.get("est_maison") is True)
             except Exception:
                 return False
+
     return False
 
 
 def wine_color_emoji(v: dict) -> str:
     couleur = ""
     c = v.get("couleur")
+
     if isinstance(c, dict):
         couleur = str(c.get("valeur", "")).lower()
     elif c is not None:
@@ -53,7 +58,7 @@ def wine_color_emoji(v: dict) -> str:
         return "🔴"
     if "blanc" in couleur:
         return "🌕"
-    if "ros" in couleur:  # rosé / rose / ros
+    if "ros" in couleur:
         return "🏮"
     return "⚪"
 
@@ -61,7 +66,6 @@ def wine_color_emoji(v: dict) -> str:
 def emoji_from_type(v: dict) -> str:
     t = str(val_or(v.get("type"), "")).lower()
 
-    # ✅ Vin = emoji couleur
     if "vin" in t:
         return wine_color_emoji(v)
 
@@ -76,7 +80,6 @@ def emoji_from_type(v: dict) -> str:
     if any(x in t for x in ["liqueur", "crème", "creme"]):
         return "🍯"
 
-    # ⚠️ dans ton Bar tu as souvent mi s🍾 en “autres”
     return "🍾"
 
 
@@ -90,6 +93,7 @@ def build_base_label(v: dict) -> str:
     label = f"{badge}{emoji} {nom}".strip()
     if an not in ("-", "", None):
         label = f"{label} ({an})"
+
     return label
 
 
@@ -98,7 +102,6 @@ try:
     shelves = int(float(get_ha("input_number.bar_nb_etageres")["state"]))
     cols = int(float(get_ha("input_number.bar_nb_colonnes")["state"]))
 
-    # inventaire depuis l'attribut "spiritueux" (souvent JSON string chez toi)
     raw = inv.get("attributes", {}).get("spiritueux", "{}")
     if isinstance(raw, str):
         try:
@@ -110,11 +113,11 @@ try:
     else:
         spirits = {}
 
-    # 1) on calcule les labels EXACTS + gestion des doublons "#n" comme tes input_select
-    counts = {}   # base_label -> n
-    stock = []    # liste de labels finaux, répétée par quantité
+    # 1) On construit une liste d'entrées au format nouveau :
+    #    {"id": ..., "label": ...}
+    counts = {}
+    stock = []
 
-    # IMPORTANT: on garde l'ordre du dict (comme en Jinja bar.items())
     for sid, v in spirits.items():
         if not isinstance(v, dict):
             continue
@@ -126,24 +129,30 @@ try:
 
         qte = int(v.get("nombre_bouteilles", 0) or 0)
         for _ in range(qte):
-            stock.append(final_label)
+            stock.append({
+                "id": sid,
+                "label": final_label
+            })
 
-    # optionnel: trier POUR grouper visuellement, sans casser les #n déjà attribués
-    stock.sort()
+    # tri visuel par label, sans casser la structure
+    stock.sort(key=lambda x: x["label"].lower())
 
-    # 2) Remplissage du plan (format simple)
+    # 2) Remplissage du plan au NOUVEAU FORMAT
     nouveau_plan = {}
     idx = 0
+
     for s in range(1, shelves + 1):
         for c in range(1, cols + 1):
             key = f"E{s}-{c}"
-            nouveau_plan[key] = stock[idx] if idx < len(stock) else "none"
+            if idx < len(stock):
+                nouveau_plan[key] = stock[idx]
+            else:
+                nouveau_plan[key] = "none"
             idx += 1
 
     with open(PATH_PLAN, "w", encoding="utf-8") as f:
         json.dump(nouveau_plan, f, indent=2, ensure_ascii=False)
 
-    # regen HTML
     subprocess.run(["python3", GEN_HTML], check=False)
 
     print("OK autofill_bar + HTML")
