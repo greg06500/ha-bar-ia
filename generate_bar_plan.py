@@ -15,7 +15,7 @@ from string import Template
 # Home Assistant API
 # -----------------------------
 HA_URL_BASE = "http://localhost:8123/api/states/"
-HA_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIxMWVmNWIzODA5NzA0MmY2YjJiODQ4NjQzYzNjYTE1MiIsImlhdCI6MTc3MTUxMDU3NSwiZXhwIjoyMDg2ODcwNTc1fQ.C1qMzSBVraYElh_2UFu58tqKUwBGP2QpE_aGFaV6TGE"
+HA_TOKEN = "Mon_token"
 
 ENTITY_SHELVES = "input_number.bar_nb_etageres"
 ENTITY_COLS    = "input_number.bar_nb_colonnes"
