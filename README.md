@@ -185,7 +185,7 @@ Fichiers concernés :
 * `analyze_bar_stock.py`
 * `bar_autofill.py`
 * `bar_empty.py`
-* 
+
 Pour créer un jeton longue durée, cliquez sur votre nom en bas du menu à gauche dans HA => onglet Securité => (en bas) Jetons d'accès longue durée / créer un jeton.
 
 ---
